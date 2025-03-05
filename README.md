@@ -3,6 +3,8 @@
 ## What is InvestiGUT?
 InvestiGUT has been designed to allow users to study the ecological prevalence of a protein sequence across human gut microbiome samples.
 
+[![DOI](https://zenodo.org/badge/766999755.svg)](https://doi.org/10.5281/zenodo.14973403)
+
 ## How does InvestiGUT work?
 InvestiGUT (v1.1) accepts either a single protein sequence or a set of sequences, as defined by the options ‘–s’ or ‘–m’ respectively. User-provided protein sequences are matched to the collection of human gut microbiome proteins via DIAMOND (v2.1.11) alignment with a default minimum query and subject coverage of 90% and identity of 90%, which can be defined by the user. User proteins can be analysed individually (-s), or as a group (-m) where all proteins must be present within a sample to be considered. The group analysis allows users to determine how frequently all enzymes in a certain pathway or all subunits in a protein complex are present. Output is divided into metagenomic and species-based analysis results, with both being available as raw data in the form of TSV files and as automatically generated vector figures. 
 
