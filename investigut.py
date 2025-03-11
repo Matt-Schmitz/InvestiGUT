@@ -46,10 +46,10 @@ def main():
     args, unknown = parser.parse_known_args()
 
     combine_qseqids = False
-    save_folder="."
     input_fasta = args.i
     now = datetime.now().strftime(f"%y_%m_%d_%H_%M_%S")
-    save_folder = datetime.now().strftime(f"output/{now}_investigut_output")
+    script_directory = os.path.dirname(os.path.abspath(__file__))
+    save_folder = datetime.now().strftime(f"{script_directory}/output/{now}_investigut_output")
     if args.o:
         save_folder=args.o
     if args.s:
@@ -73,7 +73,6 @@ def main():
     
     # Extract filename without extension
     dmnd_tsv = f"{now}_{os.path.splitext(os.path.basename(input_fasta))[0]}.tsv"
-    script_directory = os.path.dirname(os.path.abspath(__file__))
     data_folder = os.path.join(script_directory, 'data')
     metadata_folder = os.path.join(data_folder, 'metadata')  
     if args.d:
@@ -300,8 +299,8 @@ def main():
         global_count = sum(len(x) for x in all_res.values())
         #print(qseqid)
         #print(f"Global prevalence: {found_count}/{global_count} ({found_count/global_count*100 :.02f} %)")
-        os.makedirs(f"./{save_folder}/{qseqid}", exist_ok=True)
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        os.makedirs(f"{save_folder}/{qseqid}", exist_ok=True)
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             f.write(qseqid +"\n")
             f.write(f"Global prevalence: {found_count}/{global_count} ({found_count/global_count*100 :.02f} %)\n")
             f.write("\nStudy\tDisease\tPrevalence_Healthy\tPrevalence_Healthy_%\tPrevalence_Disease\tPrevalence_Disease_%\tp-value\tBH-adj._p-value\n")
@@ -490,12 +489,12 @@ def main():
             add_sig(fig.get_ylim(),[[(0,1),corr]])
             #plt.xlim(-100,5100)
             #plt.xticks(rotation=90)
-            os.makedirs(f"./{save_folder}/{qseqid}/disease/one_study/", exist_ok=True)
-            plt.savefig(f"./{save_folder}/{qseqid}/disease/one_study/Prevalence_of_{qseqid}_in_{group}_({study}).svg")
+            os.makedirs(f"{save_folder}/{qseqid}/disease/one_study/", exist_ok=True)
+            plt.savefig(f"{save_folder}/{qseqid}/disease/one_study/Prevalence_of_{qseqid}_in_{group}_({study}).svg")
             plt.close()
             #plt.show() 
             #print (qseqid, study, group, prev, orig, corr)
-            with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+            with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
                 f.write(f'{study}\t{group}\t{prev["healthy"][0]}\t{prev["healthy"][1]}\t{prev["disease"][0]}\t{prev["disease"][1]}\t{orig}\t{corr}\n')
     for qseqid, group, prev, orig, corr in zip(qseqid_list_multi, groups_list_multi, prev_list_multi, stored_stats_multi, list(multipletests(stored_stats_multi, alpha=0.05, method='fdr_bh', is_sorted=False, returnsorted=False)[1])):
         if corr < 5: 
@@ -514,12 +513,12 @@ def main():
             add_sig(fig.get_ylim(),[[(0,1),corr]])
             #plt.xlim(-100,5100)
             #plt.xticks(rotation=90)
-            os.makedirs(f"./{save_folder}/{qseqid}/disease/combined_studies/", exist_ok=True)
-            plt.savefig(f"./{save_folder}/{qseqid}/disease/combined_studies/Prevalence_of_{qseqid}_in_{group}.svg")
+            os.makedirs(f"{save_folder}/{qseqid}/disease/combined_studies/", exist_ok=True)
+            plt.savefig(f"{save_folder}/{qseqid}/disease/combined_studies/Prevalence_of_{qseqid}_in_{group}.svg")
             plt.close()
             #plt.show() 
             #print ("multi", qseqid, group, prev, orig, corr)
-            with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+            with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
                 f.write(f'multi_study\t{group}\t{prev["healthy"][0]}\t{prev["healthy"][1]}\t{prev["disease"][0]}\t{prev["disease"][1]}\t{orig}\t{corr}\n')
 
     print("Finished writing disease data")
@@ -533,7 +532,7 @@ def main():
     figure_data = dict()
     x_pos_dict = dict()
     for qseqid, one_res in dmnd_res.items():
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             f.write("\nCountry_1\tCountry_2\tPrevalence_Country_1\tPrevalence_Country_1_%\tPrevalence_Country_2\tPrevalence_Country_2_%\tp-value\tBH-adj._p-value\n")
         combined_data_all = defaultdict(int)
         for study, data in all_res.items():
@@ -610,15 +609,15 @@ def main():
             #plt.xlim(-100,5100)
             plt.xticks(rotation=90)
             #add_sig(fig.get_ylim(),corr_p_val_dict[qseqid])
-            os.makedirs(f"./{save_folder}/{qseqid}/country/", exist_ok=True)
-            plt.savefig(f"./{save_folder}/{qseqid}/country/Prevalence_of_{qseqid}_by_Country.svg")
+            os.makedirs(f"{save_folder}/{qseqid}/country/", exist_ok=True)
+            plt.savefig(f"{save_folder}/{qseqid}/country/Prevalence_of_{qseqid}_by_Country.svg")
             #plt.show() 
             plt.close()
         [[c1_yes, c1_no],[c2_yes,c2_no]] = prev
         
         #if corr < 0.05: print ("  ", f'{group[0]}\t{group[1]}\t{c1_yes}/{c1_yes+c1_no}\t{c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}')   
 
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             f.write(f'{group[0]}\t{group[1]}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
     print("Finished writing country data")
 
@@ -636,7 +635,7 @@ def main():
     keep_japan = {}#{"country":["JPN"]}
     ##############################################################
     for qseqid, one_res in dmnd_res.items():
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             f.write("\nDemographic_Factor\tValue_1\tValue_2\tPrevalence_Value_1\tPrevalence_Value_1_%\tPrevalence_Value_2\tPrevalence_Value_2_%\tp-value\tBH-adj._p-value\n")
     for feature in global_features:
         all_res, dmnd_res = get_metadata_count(feature, all_not_none=True, keep_only= keep_japan, multi=combine_qseqids)
@@ -721,8 +720,8 @@ def main():
                 #print(corr_p_val_dict[(qseqid,feature)])
                 add_sig(fig.get_ylim(),corr_p_val_dict[(qseqid,feature)])
             #plt.savefig(f"./figures/archaea/Prevalence of MCR (α, β, and γ  Subunits) by {join_cols}.svg")
-            os.makedirs(f"./{save_folder}/{qseqid}/other_demographic_factors/", exist_ok=True)
-            plt.savefig(f"./{save_folder}/{qseqid}/other_demographic_factors/Prevalence_of_{qseqid}_by_{join_cols}.svg")
+            os.makedirs(f"{save_folder}/{qseqid}/other_demographic_factors/", exist_ok=True)
+            plt.savefig(f"{save_folder}/{qseqid}/other_demographic_factors/Prevalence_of_{qseqid}_by_{join_cols}.svg")
             #plt.show()
             plt.close()  
         #if corr < 1.05: print('{:>30} {:>30} {:>30} {:>30}'.format(*(str(feature), str(group),orig,corr)))
@@ -730,7 +729,7 @@ def main():
         new_line="\n"
         #if corr < 0.05: print ("  ", f'{group[0]}\t{group[1]}\t{c1_yes}/{c1_yes+c1_no}\t{c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}')   
         #print(f'{"+".join(feature)}\t{group[0].replace(new_line,"")}\t{group[1].replace(new_line,"")}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             f.write(f'{"+".join(feature)}\t{group[0].replace(new_line,"")}\t{group[1].replace(new_line,"")}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
     #print('{:>30} {:>30} {:>30} {:>30}'.format(*("Metadata Feature", "Groups Compared","Original p-Value","BH corrected p-Value"))+"\n")
     print("Finished writing other demographic data")
@@ -738,7 +737,7 @@ def main():
     # Read MAG Abundance
     @disk_cache(cache_folder=data_folder)
     def read_leviatan_abundance():
-        return pd.read_excel('./data/Leviatan_species_abundance.xlsx', index_col=0) 
+        return pd.read_excel(f'{script_directory}/data/Leviatan_species_abundance.xlsx', index_col=0) 
 
     df = read_leviatan_abundance()
     print("Finished reading Leviatan abundance data")
@@ -778,7 +777,7 @@ def main():
     # gtdbtk.bac120.summary.tsv      gtdbtk.ar53.summary.tsv
     lev_metadata = dict()
     to_rank = {"d__":"domain","k__":"kingdom","p__":"phylum","c__":"class","o__":"order","f__":"family","g__":"genus","s__":"species"}
-    lev_metadata_files = ["./data/metadata/gtdbtk.bac120.summary.tsv", "./data/metadata/gtdbtk.ar53.summary.tsv"]
+    lev_metadata_files = [f"{script_directory}/data/metadata/gtdbtk.bac120.summary.tsv", f"{script_directory}/data/metadata/gtdbtk.ar53.summary.tsv"]
     for lev_metadata_file in lev_metadata_files:
         with open(lev_metadata_file, 'r') as f:
             for line in f:
@@ -825,7 +824,7 @@ def main():
 
 
     for qseqid, _ in dmnd_res.items():#for qseqid in all_qseqids:
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             if lev_files_dict.get(qseqid):
                 lev_files=lev_files_dict.get(qseqid)
             
@@ -850,7 +849,7 @@ def main():
 
     # Write MAG Taxa
     for qseqid, _ in dmnd_res.items():#for qseqid in all_qseqids:
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             if lev_files_dict.get(qseqid):
                 lev_files=lev_files_dict.get(qseqid)
                 f.write("Taxonomic rank abundance:\n")
@@ -891,7 +890,7 @@ def main():
     total_il = df.index.str.startswith('IL').sum()
     total_nld = df.index.str.startswith('NLD').sum()
     for qseqid, lev_files in lev_files_dict.items():
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             f.write("Total MAG inclusion:\n")
             for rep_num,rep_non_zero_count in df[lev_files].count().items():
                 f.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_il+total_nld}\n')
@@ -907,7 +906,7 @@ def main():
     # Write FPF
 
     for qseqid, [fpf, fpf_nonzero, fpf_il, fpf_nonzero_il, fpf_nld, fpf_nonzero_nld] in lev_violin.items():
-        with open(f"./{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
             u_statistic, p_value = mannwhitneyu(fpf_nonzero_il, fpf_nonzero_nld)
             f.write(f'Function Positive Fraction:\n')
             f.write(f'\tMean: Israel:{mean(fpf_il)}\tIsrael-Nonzero: {mean(fpf_nonzero_il)}\tNeatherlands: {mean(fpf_nld)}\tNeatherlands-Nonzero: {mean(fpf_nonzero_nld)}\n')
@@ -949,8 +948,8 @@ def main():
             plt.ylabel('Function Positive Fraction (%)')
             plt.title(f'Function Positive Fraction of {qseqid}')
             plt.show()
-            os.makedirs(f"./{save_folder}/{qseqid}/FPF/", exist_ok=True)
-            plt.savefig(f"./{save_folder}/{qseqid}/FPF/Function Positive Fraction of {qseqid}.svg")
+            os.makedirs(f"{save_folder}/{qseqid}/FPF/", exist_ok=True)
+            plt.savefig(f"{save_folder}/{qseqid}/FPF/Function Positive Fraction of {qseqid}.svg")
             plt.tight_layout()
     print("Finished writing MAG data")
 
