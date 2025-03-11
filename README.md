@@ -28,8 +28,8 @@ mamba create --no-channel-priority -n investigut \
     -c bioconda -c conda-forge \
     "python=3.11" "numpy=1.24.3" "scipy=1.10.1" \
     "conda-forge::matplotlib-base" "seaborn=0.13.0" \
-    "pandas=1.5.3" "statsmodels=0.13.5" "ete3=3.1.2" \
-    "openpyxl=3.0.10" "bioconda::diamond=2.1.11"
+    "libsqlite=3.48.0" "pandas=1.5.3" "statsmodels=0.13.5" \
+    "ete3=3.1.2" "openpyxl=3.0.10" "bioconda::diamond=2.1.11"
 ```
 4. Activate the environment.  
 ```bash
