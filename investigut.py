@@ -49,7 +49,7 @@ def main():
     input_fasta = args.i
     now = datetime.now().strftime(f"%y_%m_%d_%H_%M_%S")
     script_directory = os.path.dirname(os.path.abspath(__file__))
-    save_folder = datetime.now().strftime(f"{script_directory}/output/{now}_investigut_output")
+    save_folder = datetime.now().strftime(f"./{now}_investigut_output")
     if args.o:
         save_folder=args.o
     if args.s:
