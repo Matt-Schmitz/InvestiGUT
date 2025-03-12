@@ -299,11 +299,12 @@ def main():
         global_count = sum(len(x) for x in all_res.values())
         #print(qseqid)
         #print(f"Global prevalence: {found_count}/{global_count} ({found_count/global_count*100 :.02f} %)")
-        os.makedirs(f"{save_folder}/{qseqid}", exist_ok=True)
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        os.makedirs(f"{save_folder}/{qseqid}/FPF/", exist_ok=True)
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
             f.write(qseqid +"\n")
-            f.write(f"Global prevalence: {found_count}/{global_count} ({found_count/global_count*100 :.02f} %)\n")
-            f.write("\nStudy\tDisease\tPrevalence_Healthy\tPrevalence_Healthy_%\tPrevalence_Disease\tPrevalence_Disease_%\tp-value\tBH-adj._p-value\n")
+            f.write(f"Metagenome prevalence: {found_count}/{global_count} ({found_count/global_count*100 :.02f} %)\n")
+        with open(f"{save_folder}/{qseqid}/FPF/overview.txt", 'a+') as f2:
+            f2.write(f"Metagenome prevalence: {found_count}/{global_count} ({found_count/global_count*100 :.02f} %)\n")
 
     print("Finished writing global prevalences")
 
@@ -471,9 +472,16 @@ def main():
             prev_list_multi.append(get_prevalence(disease_dict[key].get()))    
             #print(f"multi {key}", get_prevalence(disease_dict[key].get()), multi_study_disease_stats)
     print("Finished obtaining disease data")
-
+    
     # Write Disease Data
-    for qseqid, study, group, prev, orig, corr in zip(qseqid_list, stored_studies, groups_list, prev_list, stored_stats, list(multipletests(stored_stats, alpha=0.05, method='fdr_bh', is_sorted=False, returnsorted=False)[1])):
+    for qseqid, one_res in dmnd_res.items():
+        os.makedirs(f"{save_folder}/{qseqid}/disease/", exist_ok=True)
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
+            f.write("\nStudy\tDisease\tPrevalence_Healthy\tPrevalence_Healthy_%\tPrevalence_Disease\tPrevalence_Disease_%\tp-value\tBH-adj._p-value\n")
+        with open(f"{save_folder}/{qseqid}/disease/overview.txt", 'a+') as f2:
+            f2.write("Study\tDisease\tPrevalence_Healthy\tPrevalence_Healthy_%\tPrevalence_Disease\tPrevalence_Disease_%\tp-value\tBH-adj._p-value\n")
+
+    for qseqid, study, group, prev, orig, corr in sorted(zip(qseqid_list, stored_studies, groups_list, prev_list, stored_stats, list(multipletests(stored_stats, alpha=0.05, method='fdr_bh', is_sorted=False, returnsorted=False)[1])), key=lambda x: (x[2], x[1])):
         if corr < 5:   
             x_vals, y_vals, bar_labels = [], [], []
             x_vals.append("Healthy")
@@ -494,9 +502,11 @@ def main():
             plt.close()
             #plt.show() 
             #print (qseqid, study, group, prev, orig, corr)
-            with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+            with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
                 f.write(f'{study}\t{group}\t{prev["healthy"][0]}\t{prev["healthy"][1]}\t{prev["disease"][0]}\t{prev["disease"][1]}\t{orig}\t{corr}\n')
-    for qseqid, group, prev, orig, corr in zip(qseqid_list_multi, groups_list_multi, prev_list_multi, stored_stats_multi, list(multipletests(stored_stats_multi, alpha=0.05, method='fdr_bh', is_sorted=False, returnsorted=False)[1])):
+            with open(f"{save_folder}/{qseqid}/disease/overview.txt", 'a+') as f2:
+                f2.write(f'{study}\t{group}\t{prev["healthy"][0]}\t{prev["healthy"][1]}\t{prev["disease"][0]}\t{prev["disease"][1]}\t{orig}\t{corr}\n')
+    for qseqid, group, prev, orig, corr in sorted(zip(qseqid_list_multi, groups_list_multi, prev_list_multi, stored_stats_multi, list(multipletests(stored_stats_multi, alpha=0.05, method='fdr_bh', is_sorted=False, returnsorted=False)[1])), key=lambda x: x[1]):
         if corr < 5: 
             
             x_vals, y_vals, bar_labels = [], [], []
@@ -518,8 +528,10 @@ def main():
             plt.close()
             #plt.show() 
             #print ("multi", qseqid, group, prev, orig, corr)
-            with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+            with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
                 f.write(f'multi_study\t{group}\t{prev["healthy"][0]}\t{prev["healthy"][1]}\t{prev["disease"][0]}\t{prev["disease"][1]}\t{orig}\t{corr}\n')
+            with open(f"{save_folder}/{qseqid}/disease/overview.txt", 'a+') as f2:
+                f2.write(f'multi_study\t{group}\t{prev["healthy"][0]}\t{prev["healthy"][1]}\t{prev["disease"][0]}\t{prev["disease"][1]}\t{orig}\t{corr}\n')
 
     print("Finished writing disease data")
 
@@ -532,8 +544,11 @@ def main():
     figure_data = dict()
     x_pos_dict = dict()
     for qseqid, one_res in dmnd_res.items():
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        os.makedirs(f"{save_folder}/{qseqid}/country/", exist_ok=True)
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
             f.write("\nCountry_1\tCountry_2\tPrevalence_Country_1\tPrevalence_Country_1_%\tPrevalence_Country_2\tPrevalence_Country_2_%\tp-value\tBH-adj._p-value\n")
+        with open(f"{save_folder}/{qseqid}/country/overview.txt", 'a+') as f2:
+            f2.write("Country_1\tCountry_2\tPrevalence_Country_1\tPrevalence_Country_1_%\tPrevalence_Country_2\tPrevalence_Country_2_%\tp-value\tBH-adj._p-value\n")
         combined_data_all = defaultdict(int)
         for study, data in all_res.items():
             for columns, count in data.items():
@@ -617,8 +632,10 @@ def main():
         
         #if corr < 0.05: print ("  ", f'{group[0]}\t{group[1]}\t{c1_yes}/{c1_yes+c1_no}\t{c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}')   
 
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
             f.write(f'{group[0]}\t{group[1]}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
+        with open(f"{save_folder}/{qseqid}/country/overview.txt", 'a+') as f2:
+            f2.write(f'{group[0]}\t{group[1]}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
     print("Finished writing country data")
 
     # Write Other Demographic Factors
@@ -635,8 +652,11 @@ def main():
     keep_japan = {}#{"country":["JPN"]}
     ##############################################################
     for qseqid, one_res in dmnd_res.items():
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        os.makedirs(f"{save_folder}/{qseqid}/other_demographic_factors/", exist_ok=True)
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
             f.write("\nDemographic_Factor\tValue_1\tValue_2\tPrevalence_Value_1\tPrevalence_Value_1_%\tPrevalence_Value_2\tPrevalence_Value_2_%\tp-value\tBH-adj._p-value\n")
+        with open(f"{save_folder}/{qseqid}/other_demographic_factors/overview.txt", 'a+') as f2:
+            f2.write("Demographic_Factor\tValue_1\tValue_2\tPrevalence_Value_1\tPrevalence_Value_1_%\tPrevalence_Value_2\tPrevalence_Value_2_%\tp-value\tBH-adj._p-value\n")
     for feature in global_features:
         all_res, dmnd_res = get_metadata_count(feature, all_not_none=True, keep_only= keep_japan, multi=combine_qseqids)
         #print(dmnd_res)
@@ -729,8 +749,10 @@ def main():
         new_line="\n"
         #if corr < 0.05: print ("  ", f'{group[0]}\t{group[1]}\t{c1_yes}/{c1_yes+c1_no}\t{c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}')   
         #print(f'{"+".join(feature)}\t{group[0].replace(new_line,"")}\t{group[1].replace(new_line,"")}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
             f.write(f'{"+".join(feature)}\t{group[0].replace(new_line,"")}\t{group[1].replace(new_line,"")}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
+        with open(f"{save_folder}/{qseqid}/other_demographic_factors/overview.txt", 'a+') as f2:
+            f2.write(f'{"+".join(feature)}\t{group[0].replace(new_line,"")}\t{group[1].replace(new_line,"")}\t{c1_yes}/{c1_yes+c1_no}\t{100*c1_yes/(c1_yes+c1_no)}\t{c2_yes}/{c2_yes+c2_no}\t{100*c2_yes/(c2_yes+c2_no)}\t{orig}\t{corr}\n')
     #print('{:>30} {:>30} {:>30} {:>30}'.format(*("Metadata Feature", "Groups Compared","Original p-Value","BH corrected p-Value"))+"\n")
     print("Finished writing other demographic data")
 
@@ -824,52 +846,62 @@ def main():
 
 
     for qseqid, _ in dmnd_res.items():#for qseqid in all_qseqids:
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
-            if lev_files_dict.get(qseqid):
-                lev_files=lev_files_dict.get(qseqid)
-            
-                #print(qseqid)
-                f.write(f"\nLeviatan species genomes:\n")        ##{total_qseqid(qseqid)}/{total_mags}     1629/9634
-                for rep in lev_files:
-                    res = []
-                    for i, tax_rank in enumerate(["species","genus","family","order","class","phylum","domain"]):
-                        tax_name, taxid = lev_metadata[rep][tax_rank]
-                        if " " in tax_name: c.append(tax_name) #######
-                        if tax_name and not map_rep.get(rep): map_rep[rep]=tax_name 
-                        if taxid:
-                            res.append(" "*(2*i+2)+f'{tax_rank}: {tax_name} ({taxid[0]})')  ##also include leviatan Rep number with rep?
-                            break
-                        else:
-                            res.append(" "*(2*i+2)+f'{tax_rank} not in database: {tax_name if tax_name else "N/A"}')
-                        
-                    f.write("\n".join(res)+"\n")
-            else:
-                f.write(f"\nLeviatan species genomes:\n\tN/A\n")
+        os.makedirs(f"{save_folder}/{qseqid}/FPF/", exist_ok=True)
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
+            with open(f"{save_folder}/{qseqid}/FPF/overview.txt", 'a+') as f2:
+                if lev_files_dict.get(qseqid):
+                    lev_files=lev_files_dict.get(qseqid)
+                
+                    #print(qseqid)
+                    f.write(f"\nLeviatan species genomes:\n")        ##{total_qseqid(qseqid)}/{total_mags}     1629/9634
+                    f2.write(f"Leviatan species genomes:\n")
+                    for rep in lev_files:
+                        res = []
+                        for i, tax_rank in enumerate(["species","genus","family","order","class","phylum","domain"]):
+                            tax_name, taxid = lev_metadata[rep][tax_rank]
+                            if " " in tax_name: c.append(tax_name) #######
+                            if tax_name and not map_rep.get(rep): map_rep[rep]=tax_name 
+                            if taxid:
+                                res.append(" "*(2*i+2)+f'{tax_rank}: {tax_name} ({taxid[0]})')  ##also include leviatan Rep number with rep?
+                                break
+                            else:
+                                res.append(" "*(2*i+2)+f'{tax_rank} not in database: {tax_name if tax_name else "N/A"}')
+                            
+                        f.write("\n".join(res)+"\n")
+                        f2.write("\n".join(res)+"\n")
+                else:
+                    f.write(f"\nLeviatan species genomes:\n\tN/A\n")
+                    f2.write(f"Leviatan species genomes:\n\tN/A\n")
 
 
     # Write MAG Taxa
     for qseqid, _ in dmnd_res.items():#for qseqid in all_qseqids:
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
-            if lev_files_dict.get(qseqid):
-                lev_files=lev_files_dict.get(qseqid)
-                f.write("Taxonomic rank abundance:\n")
-                for rank in ["phylum","family","genus"]:
-                    pos_rank_dict = defaultdict(int)
-                    all_rank_dict = defaultdict(int)
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
+            with open(f"{save_folder}/{qseqid}/FPF/overview.txt", 'a+') as f2:
+                if lev_files_dict.get(qseqid):
+                    lev_files=lev_files_dict.get(qseqid)
+                    f.write("Taxonomic rank abundance:\n")
+                    f2.write("Taxonomic rank abundance:\n")
+                    for rank in ["phylum","family","genus"]:
+                        pos_rank_dict = defaultdict(int)
+                        all_rank_dict = defaultdict(int)
 
-                    for rep in lev_files:
-                        tax_name, taxid = lev_metadata[rep][rank]
-                        if tax_name:
-                            pos_rank_dict[tax_name]+=1
-                    for rep in df.columns.to_list():
-                        tax = lev_metadata[rep][rank][0]
-                        if tax in pos_rank_dict:
-                            all_rank_dict[tax]+=1
-                    f.write("\t"+rank+"\n")
-                    for rep, count in pos_rank_dict.items():    
-                        f.write(f'\t\t{rep}: {count}/{all_rank_dict[rep]} ({count/all_rank_dict[rep]*100 :.2f} %)\n')
-            else:
-                f.write(f"\nTaxonomic rank abundance:\n\tN/A\n")
+                        for rep in lev_files:
+                            tax_name, taxid = lev_metadata[rep][rank]
+                            if tax_name:
+                                pos_rank_dict[tax_name]+=1
+                        for rep in df.columns.to_list():
+                            tax = lev_metadata[rep][rank][0]
+                            if tax in pos_rank_dict:
+                                all_rank_dict[tax]+=1
+                        f.write("\t"+rank+"\n")
+                        f2.write("\t"+rank+"\n")
+                        for rep, count in pos_rank_dict.items():    
+                            f.write(f'\t\t{rep}: {count}/{all_rank_dict[rep]} ({count/all_rank_dict[rep]*100 :.2f} %)\n')
+                            f2.write(f'\t\t{rep}: {count}/{all_rank_dict[rep]} ({count/all_rank_dict[rep]*100 :.2f} %)\n')
+                else:
+                    f.write(f"\nTaxonomic rank abundance:\n\tN/A\n")
+                    f2.write(f"\nTaxonomic rank abundance:\n\tN/A\n")
 
 
     lev_violin = dict()
@@ -890,23 +922,30 @@ def main():
     total_il = df.index.str.startswith('IL').sum()
     total_nld = df.index.str.startswith('NLD').sum()
     for qseqid, lev_files in lev_files_dict.items():
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
-            f.write("Total MAG inclusion:\n")
-            for rep_num,rep_non_zero_count in df[lev_files].count().items():
-                f.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_il+total_nld}\n')
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
+            with open(f"{save_folder}/{qseqid}/FPF/overview.txt", 'a+') as f2:
+                f.write("Total MAG inclusion:\n")
+                f2.write("Total MAG inclusion:\n")
+                for rep_num,rep_non_zero_count in df[lev_files].count().items():
+                    f.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_il+total_nld}\n')
+                    f2.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_il+total_nld}\n')
 
-            f.write("Israel MAG inclusion:\n")
-            for rep_num,rep_non_zero_count in df[lev_files][df[lev_files].index.str.startswith('IL')].count().items():
-                f.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_il}\n')
+                f.write("Israel MAG inclusion:\n")
+                f2.write("Israel MAG inclusion:\n")
+                for rep_num,rep_non_zero_count in df[lev_files][df[lev_files].index.str.startswith('IL')].count().items():
+                    f.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_il}\n')
+                    f2.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_il}\n')
 
-            f.write("Netherlands MAG inclusion:\n")
-            for rep_num,rep_non_zero_count in df[lev_files][df[lev_files].index.str.startswith('NLD')].count().items():
-                f.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_nld}\n')
+                f.write("Netherlands MAG inclusion:\n")
+                f2.write("Netherlands MAG inclusion:\n")
+                for rep_num,rep_non_zero_count in df[lev_files][df[lev_files].index.str.startswith('NLD')].count().items():
+                    f.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_nld}\n')
+                    f2.write(f'\t{map_rep[rep_num]}\t({rep_num})\t{rep_non_zero_count}/{total_nld}\n')
 
     # Write FPF
 
     for qseqid, [fpf, fpf_nonzero, fpf_il, fpf_nonzero_il, fpf_nld, fpf_nonzero_nld] in lev_violin.items():
-        with open(f"{save_folder}/{qseqid}/overview.txt", 'a+') as f:
+        with open(f"{save_folder}/{qseqid}/overview_all.txt", 'a+') as f:
             u_statistic, p_value = mannwhitneyu(fpf_nonzero_il, fpf_nonzero_nld)
             f.write(f'Function Positive Fraction:\n')
             f.write(f'\tMean: Israel:{mean(fpf_il)}\tIsrael-Nonzero: {mean(fpf_nonzero_il)}\tNeatherlands: {mean(fpf_nld)}\tNeatherlands-Nonzero: {mean(fpf_nonzero_nld)}\n')
@@ -951,6 +990,14 @@ def main():
             os.makedirs(f"{save_folder}/{qseqid}/FPF/", exist_ok=True)
             plt.savefig(f"{save_folder}/{qseqid}/FPF/Function Positive Fraction of {qseqid}.svg")
             plt.tight_layout()
+    for qseqid, [fpf, fpf_nonzero, fpf_il, fpf_nonzero_il, fpf_nld, fpf_nonzero_nld] in lev_violin.items():
+        with open(f"{save_folder}/{qseqid}/FPF/overview.txt", 'a+') as f:
+            u_statistic, p_value = mannwhitneyu(fpf_nonzero_il, fpf_nonzero_nld)
+            f.write(f'Function Positive Fraction:\n')
+            f.write(f'\tMean: Israel:{mean(fpf_il)}\tIsrael-Nonzero: {mean(fpf_nonzero_il)}\tNeatherlands: {mean(fpf_nld)}\tNeatherlands-Nonzero: {mean(fpf_nonzero_nld)}\n')
+            f.write(f'\tGeometric Mean: Israel:{gmean(fpf_il)}\tIsrael-Nonzero: {gmean(fpf_nonzero_il)}\tNeatherlands: {gmean(fpf_nld)}\tNeatherlands-Nonzero: {gmean(fpf_nonzero_nld)}\n')
+            f.write(f'\tMedian: Israel:{median(fpf_il)}\tIsrael-Nonzero: {median(fpf_nonzero_il)}\tNeatherlands: {median(fpf_nld)}\tNeatherlands-Nonzero: {median(fpf_nonzero_nld)}\n')
+            f.write(f'Israel vs Netherlands:\n\tU-statistic: {u_statistic}\n\tp-value: {p_value}\n')
     print("Finished writing MAG data")
 
 if __name__ == "__main__":
