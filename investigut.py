@@ -909,7 +909,7 @@ def main():
     for qseqid, lev_files in lev_files_dict.items():
         fpf = df[lev_files].sum(axis=1)
         fpf_nonzero = fpf[fpf != 0]*100
-        
+
         fpf_il = [value for label, value in fpf.items() if label.startswith('IL')]
         fpf_nonzero_il = [value for label, value in fpf_nonzero.items() if label.startswith('IL')]
 
@@ -1002,7 +1002,7 @@ def main():
             f.write(f'\tGeometric Mean: Israel:{gmean(fpf_il)}\tIsrael-Nonzero: {gmean(fpf_nonzero_il) if fpf_nonzero_il else "na"}\tNeatherlands: {gmean(fpf_nld)}\tNeatherlands-Nonzero: {gmean(fpf_nonzero_nld) if fpf_nonzero_nld else "na"}\n')
             f.write(f'\tMedian: Israel:{median(fpf_il)}\tIsrael-Nonzero: {median(fpf_nonzero_il) if fpf_nonzero_il else "na"}\tNeatherlands: {median(fpf_nld)}\tNeatherlands-Nonzero: {median(fpf_nonzero_nld) if fpf_nonzero_nld else "na"}\n')
             if fpf_nonzero_il==[] or fpf_nonzero_nld==[]:
-                f.write(f'Israel-Nonzero vs Netherlands-Nonzero:\n\tU-statistic: na\n\tp-value: na\t("No non-zero values of fpf for either Israel or Netherlands)\n')
+                f.write(f'Israel-Nonzero vs Netherlands-Nonzero:\n\tU-statistic: na\n\tp-value: na\t(No non-zero values of fpf for either Israel or Netherlands)\n')
             else:
                 u_statistic, p_value = mannwhitneyu(fpf_nonzero_il, fpf_nonzero_nld)
                 f.write(f'Israel-Nonzero vs Netherlands-Nonzero:\n\tU-statistic: {u_statistic}\n\tp-value: {p_value}\n')
